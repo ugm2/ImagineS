@@ -5,7 +5,20 @@ import hashlib
 import os
 import io
 from PIL import Image
+from PIL import Image
+from tqdm import tqdm
 
+op = webdriver.ChromeOptions()
+op.add_argument('headless')
+driver = webdriver.Chrome('./chromedriver', options=op)
+
+def augment_dataset(label_queries_dict, num_images_per_class=10, resize=True, image_size=224):
+    for label, queries in tqdm(label_queries_dict.items(), desc="Augmenting dataset"):
+        num_images = round(num_images_per_class / len(queries))
+        for query in queries:
+            search_and_download(query, driver, label, num_images)
+            if resize:
+                resize_images_from_folder(os.path.join('./new_images', label), (image_size, image_size))
 
 def fetch_image_urls(query:str, wd:webdriver, max_links_to_fetch:int=10, sleep_between_interactions:float=1):
     def scroll_to_end(wd):
