@@ -5,7 +5,6 @@ import hashlib
 import os
 import io
 from PIL import Image
-from PIL import Image
 from tqdm import tqdm
 
 op = webdriver.ChromeOptions()
