@@ -12,8 +12,8 @@ import logging
 from tqdm import tqdm
 
 # Set up logging
-logger = logging.get_logger(__name__)
-logger.setLevel(os.environ.get("LOG_LEVEL", "WARNING"))
+logging.basicConfig(level=os.getenv("LOGGER_LEVEL", logging.WARNING))
+logger = logging.getLogger("Dataset Augmentation classes")
 
 class WebScrapper:
 
