@@ -1,6 +1,8 @@
 import hashlib
 import io
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
 from typing import Dict, List, Tuple
 from PIL import Image
 import requests
@@ -21,7 +23,8 @@ class WebScrapper:
         if driver_type == 'chrome':
             op = webdriver.ChromeOptions()
             op.add_argument('headless')
-            self.driver = webdriver.Chrome(driver_path, options=op)
+            ser = Service(driver_path)
+            self.driver = webdriver.Chrome(service=ser, options=op)
         else:
             raise ValueError('Driver type not supported')
 
@@ -47,7 +50,7 @@ class WebScrapper:
             self.__scroll_to_end(sleep_between_interactions)
 
             # get all image thumbnail results
-            thumbnail_results = self.driver.find_elements_by_css_selector("img.Q4LuWd")
+            thumbnail_results = self.driver.find_elements(By.CSS_SELECTOR, "img.Q4LuWd")
             number_results = len(thumbnail_results)
 
             # print(f"Found: {number_results} search results. Extracting links from {results_start}:{number_results}")
@@ -61,7 +64,7 @@ class WebScrapper:
                     continue
 
                 # extract image urls    
-                actual_images = self.driver.find_elements_by_css_selector('img.n3VNCb')
+                actual_images = self.driver.find_elements(By.CSS_SELECTOR, 'img.n3VNCb')
                 for actual_image in actual_images:
                     if actual_image.get_attribute('src') and 'http' in actual_image.get_attribute('src'):
                         image_urls.add(actual_image.get_attribute('src'))
