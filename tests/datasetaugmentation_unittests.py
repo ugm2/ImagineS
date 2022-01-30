@@ -64,7 +64,6 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
         persist_images_mock.return_value = None
         resize_images_mock.return_value = None
 
-
         dataset_augmentation = DatasetAugmentation(
             driver_type='chrome',
             driver_path='path_to/chromedriver',
