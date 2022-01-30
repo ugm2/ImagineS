@@ -2,11 +2,11 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
-    name="dataset-augmentation", # Replace with your own username
+    name="ImagineS",
     version="0.0.1",
     author="Unai Garay",
     author_email="unaigaraymaestre@gmail.com",
-    description="Dataset Creation Tool library to help create a Dataset using scraping",
+    description="ImagineS (Image Engine Search) tool augments an image dataset by searching a series of queries in Google Images.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ugm2/dataset-creation-tool",

@@ -1,7 +1,7 @@
 
-# Dataset Augmentation
+# ImagineS
 
-Dataset Augmentation tool to augment an image dataset by searching a series of queries in Google Images.
+ImagineS (Image Engine Search) tool augments an image dataset by searching a series of queries in Google Images.
 
 ## Install
 
@@ -26,7 +26,7 @@ Dataset Augmentation tool to augment an image dataset by searching a series of q
 **Example:** Download `apple` and `water` related images by adding the query searches that would belong to each class.
 
 ```python
-from dataset_augmentation import DatasetAugmentation
+from imagines import DatasetAugmentation
 dataset_augmentation = DatasetAugmentation(
     driver_type='chrome',
     driver_path='path_to/chromedriver',

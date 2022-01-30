@@ -9,7 +9,7 @@ import shutil
 from PIL import Image
 import tempfile
 
-from dataset_augmentation import DatasetAugmentation, WebScrapper
+from imagines import DatasetAugmentation, WebScrapper
 from selenium.webdriver import Chrome
 from selenium.common.exceptions import WebDriverException
 
