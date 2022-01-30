@@ -28,7 +28,7 @@ class WebScrapper:
         else:
             raise ValueError('Driver type not supported')
 
-    def __scroll_to_end(self, sleep_between_interactions: float = 1):
+    def __scroll_to_end(self, sleep_between_interactions: float = 1) -> None:
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(sleep_between_interactions)
 
@@ -93,7 +93,7 @@ class DatasetAugmentation:
     def __init__(self, driver_type: str, driver_path: str):
         self.driver = WebScrapper(driver_type, driver_path)
 
-    def __persist_images(self, target_folder: str, image_urls: List[str]) -> None:
+    def _persist_images(self, target_folder: str, image_urls: List[str]) -> None:
 
         for image_url in tqdm(image_urls, desc="Saving images"):
             try:
@@ -145,7 +145,7 @@ class DatasetAugmentation:
                                                     max_links_to_fetch=max_links_to_fetch,
                                                     sleep_between_interactions=sleep_between_interactions)
 
-                self.__persist_images(target_folder, image_urls)
+                self._persist_images(target_folder, image_urls)
 
                 if resize_images:
                     self.resize_images(target_folder, image_shape)

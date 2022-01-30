@@ -1,4 +1,4 @@
-"""Unit tests for WebScrapper"""
+"""Unit tests for WebScrapper class"""
 
 import unittest
 import os
@@ -59,4 +59,3 @@ class WebScrapperUnitTests(unittest.TestCase):
         driver_path = './tests/test_artifacts/invalid_driver_path'
         with self.assertRaises(WebDriverException):
             WebScrapper(driver_type, driver_path)
-
