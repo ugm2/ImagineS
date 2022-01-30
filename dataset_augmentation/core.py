@@ -95,20 +95,24 @@ class DatasetAugmentation:
 
     def _persist_images(self, target_folder: str, image_urls: List[str]) -> None:
 
+        if not os.path.exists(target_folder):
+            os.makedirs(target_folder)
+
         for image_url in tqdm(image_urls, desc="Saving images"):
             try:
                 image_content = requests.get(image_url, timeout=10).content
+
             except Exception as e:
-                print(f"ERROR - Could not download {image_url} - {e}")
+                logger.warning(f"ERROR - Could not download {image_url} - {e}")
 
             try:
                 image_file = io.BytesIO(image_content)
                 image = Image.open(image_file).convert('RGB')
                 file_path = os.path.join(target_folder, hashlib.sha1(image_content).hexdigest()[:10] + '.jpg')
                 with open(file_path, 'wb') as f:
-                    image.save(f, "JPEG", quality=85)
+                    image.save(f)
             except Exception as e:
-                print(f"ERROR - Could not save {image_url} - {e}")
+                logger.warning(f"ERROR - Could not save {image_url} - {e}")
 
     def resize_images(self,
                       folder_path: str,
@@ -136,8 +140,6 @@ class DatasetAugmentation:
 
         for label, queries in tqdm(label_queries.items(), desc="Augmenting dataset"):
             target_folder = os.path.join(output_directory, label)
-            if not os.path.exists(target_folder):
-                os.makedirs(target_folder)
 
             for query in queries:
 

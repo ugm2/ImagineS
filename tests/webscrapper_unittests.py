@@ -3,7 +3,7 @@
 import unittest
 import os
 
-from dataset_augmentation.core import WebScrapper
+from dataset_augmentation import WebScrapper
 from selenium.webdriver import Chrome
 from selenium.common.exceptions import WebDriverException
 

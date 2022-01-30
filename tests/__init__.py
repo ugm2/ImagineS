@@ -7,10 +7,10 @@ import sys
 import logging
 
 from tests.webscrapper_unittests import WebScrapperUnitTests
-from tests.datasetaugmentation_unittests import DataAugmentationUnitTests
+from tests.datasetaugmentation_unittests import DatasetAugmentationUnitTests
 
 assert WebScrapperUnitTests
-assert DataAugmentationUnitTests
+assert DatasetAugmentationUnitTests
 
 sys.path.append(os.getcwd())
 
