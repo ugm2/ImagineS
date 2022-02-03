@@ -7,15 +7,9 @@ ImagineS (Image Engine Search) tool augments an image dataset by searching a ser
 
 ---
 
-* Create a new Conda environment
+* We recommend first creating an environment by using either [Virtual Envs](https://docs.python.org/es/3.8/tutorial/venv.html) or [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html).
 
-    `conda create -n data_aug python=3.7`
-
-* Activate environment
-
-    `source activate data_aug`
-
-* Install library
+* Then install the library using `pip`:
 
     `pip install imagines`
 
