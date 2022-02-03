@@ -2,14 +2,14 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
-    name="ImagineS",
-    version="0.0.1",
+    name="imagines",
+    version="0.0.2",
     author="Unai Garay",
     author_email="unaigaraymaestre@gmail.com",
     description="ImagineS (Image Engine Search) tool augments an image dataset by searching a series of queries in Google Images.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ugm2/dataset-creation-tool",
+    url="https://github.com/ugm2/ImagineS",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
