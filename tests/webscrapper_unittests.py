@@ -5,7 +5,6 @@ import os
 
 from imagines import WebScrapper
 from selenium.webdriver import Chrome
-from selenium.common.exceptions import WebDriverException
 
 import logging
 
@@ -23,20 +22,20 @@ class WebScrapperUnitTests(unittest.TestCase):
 
     def setUp(self):
         """Set up all tests."""
-        self.driver_path = './tests/test_artifacts/chromedriver'
-        os.chmod(self.driver_path, 755)
+        pass
 
     def test_webscrapper_init(self):
         """Unit tests for WebScrapper"""
         driver_type = 'chrome'
-        webscrapper = WebScrapper(driver_type, self.driver_path)
+        webscrapper = WebScrapper(driver_type)
         self.assertIsInstance(webscrapper, WebScrapper)
         self.assertIsInstance(webscrapper.driver, Chrome)
+        webscrapper.close_session()
 
     def test_webscrapper_search_images(self):
         """Unit tests for WebScrapper"""
         driver_type = 'chrome'
-        webscrapper = WebScrapper(driver_type, self.driver_path)
+        webscrapper = WebScrapper(driver_type)
         query = 'test'
         max_links_to_fetch = 3
         sleep_between_interactions = 1
@@ -46,16 +45,10 @@ class WebScrapperUnitTests(unittest.TestCase):
         # Check that URLs are valid
         for url in image_urls:
             self.assertTrue(url.startswith('http'))
+        webscrapper.close_session()
 
     def test_webscrapper_search_images_with_invalid_driver_type(self):
         """Unit tests for WebScrapper"""
         driver_type = 'invalid'
         with self.assertRaises(ValueError):
-            WebScrapper(driver_type, self.driver_path)
-        
-    def test_webscrapper_search_images_with_invalid_driver_path(self):
-        """Unit tests for WebScrapper"""
-        driver_type = 'chrome'
-        driver_path = './tests/test_artifacts/invalid_driver_path'
-        with self.assertRaises(WebDriverException):
-            WebScrapper(driver_type, driver_path)
+            WebScrapper(driver_type)

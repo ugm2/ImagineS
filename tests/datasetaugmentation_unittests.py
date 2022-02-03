@@ -5,13 +5,10 @@ import io
 import unittest
 from unittest.mock import patch
 import os
-import shutil
 from PIL import Image
 import tempfile
 
 from imagines import DatasetAugmentation, WebScrapper
-from selenium.webdriver import Chrome
-from selenium.common.exceptions import WebDriverException
 
 import logging
 
@@ -22,7 +19,7 @@ logger = logging.getLogger("Dataset WebScrapper UnitTests")
 class WebScrapperMock(WebScrapper):
     """Mock class for WebScrapper"""
 
-    def __init__(self, driver_type, driver_path):
+    def __init__(self, driver_type):
         """Mock class for WebScrapper"""
         pass
 
@@ -30,6 +27,10 @@ class WebScrapperMock(WebScrapper):
         """Mock class for WebScrapper"""
         toy_image_urls = ['https://www.toyimageurl.com' for _ in range(max_links_to_fetch)]
         return set(toy_image_urls)
+
+    def close_session(self):
+        """Mock class for WebScrapper"""
+        pass
 
 class DatasetAugmentationUnitTests(unittest.TestCase):
     """Unit tests for DatasetAugmentation"""
@@ -44,19 +45,18 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
         # Tmp dir
         self.tmp_dir = tempfile.mkdtemp()
 
-    @patch('dataset_augmentation.core.WebScrapper', WebScrapperMock)
+    @patch('imagines.core.WebScrapper', WebScrapperMock)
     def test_dataset_augmentation_init(self):
         """Unit tests for DataAugmentation"""
         dataset_augmentation = DatasetAugmentation(
             driver_type='chrome',
-            driver_path='path_to/chromedriver',
         )
         self.assertIsInstance(dataset_augmentation, DatasetAugmentation)
         self.assertIsInstance(dataset_augmentation.driver, WebScrapper)
 
-    @patch('dataset_augmentation.core.DatasetAugmentation._persist_images')
-    @patch('dataset_augmentation.core.DatasetAugmentation.resize_images')
-    @patch('dataset_augmentation.core.WebScrapper', WebScrapperMock)
+    @patch('imagines.core.DatasetAugmentation._persist_images')
+    @patch('imagines.core.DatasetAugmentation.resize_images')
+    @patch('imagines.core.WebScrapper', WebScrapperMock)
     def test_dataset_augmentation_augment_dataset(self, resize_images_mock, persist_images_mock):
         """Unit tests for DataAugmentation"""
 
@@ -66,7 +66,6 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
 
         dataset_augmentation = DatasetAugmentation(
             driver_type='chrome',
-            driver_path='path_to/chromedriver',
         )
         label_queries = {
             'test_label_1': ['test_query_1_1'],
@@ -106,7 +105,7 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
         self.assertTrue(persist_images_mock.called)
         self.assertTrue(resize_images_mock.called)
         
-    @patch('dataset_augmentation.core.WebScrapper', WebScrapperMock)
+    @patch('imagines.core.WebScrapper', WebScrapperMock)
     @patch('requests.get')
     def test_dataset_augmentation_persist_images(self, get_mock):
         """Unit tests for DataAugmentation"""
@@ -129,7 +128,6 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
 
         dataset_augmentation = DatasetAugmentation(
             driver_type='chrome',
-            driver_path='path_to/chromedriver',
         )
         image_urls = ['https://www.toyimageurl.com' for _ in range(3)]
         output_dir = self.tmp_dir + '/test_output_dir/'
@@ -144,7 +142,7 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
         # Assert files have been created
         self.assertTrue(os.path.exists(output_dir + hashlib.sha1(image_data).hexdigest()[:10] + '.jpg'))
 
-    @patch('dataset_augmentation.core.WebScrapper', WebScrapperMock)
+    @patch('imagines.core.WebScrapper', WebScrapperMock)
     def test_dataset_augmentation_resize_images(self):
         """Unit tests for DataAugmentation"""
 
@@ -154,7 +152,6 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
 
         dataset_augmentation = DatasetAugmentation(
             driver_type='chrome',
-            driver_path='path_to/chromedriver',
         )
         os.makedirs(self.tmp_dir + '/label')
         image_shape = (224, 224)
@@ -166,6 +163,7 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
         dataset_augmentation.resize_images(self.tmp_dir, image_shape)
 
         # Check image has been resized
-        image_file = io.BytesIO(open(self.tmp_dir + '/label/test.jpg', 'rb').read())
+        with open(self.tmp_dir + '/label/test.jpg', 'rb') as f:
+            image_file = io.BytesIO(f.read())
         image = Image.open(image_file).convert('RGB')
         self.assertEqual(image.size, image_shape)

@@ -3,6 +3,7 @@ import io
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
 from typing import Dict, List, Tuple
 from PIL import Image
 import requests
@@ -14,17 +15,21 @@ import logging
 from tqdm import tqdm
 
 # Set up logging
-logging.basicConfig(level=os.getenv("LOGGER_LEVEL", logging.WARNING))
+log_level = os.getenv("LOGGER_LEVEL", logging.WARNING)
+logging.basicConfig(level=log_level)
 logger = logging.getLogger("Dataset Augmentation classes")
 
 class WebScrapper:
 
-    def __init__(self, driver_type: str, driver_path: str):
+    def __init__(self, driver_type: str):
         if driver_type == 'chrome':
             op = webdriver.ChromeOptions()
             op.add_argument('headless')
-            ser = Service(driver_path)
-            self.driver = webdriver.Chrome(service=ser, options=op)
+            ser = Service(ChromeDriverManager(log_level=log_level).install())
+            self.driver = webdriver.Chrome(
+                service=ser,
+                options=op
+            )
         else:
             raise ValueError('Driver type not supported')
 
@@ -88,10 +93,13 @@ class WebScrapper:
 
         return image_urls
 
+    def close_session(self):
+        self.driver.quit()
+
 class DatasetAugmentation:
 
-    def __init__(self, driver_type: str, driver_path: str):
-        self.driver = WebScrapper(driver_type, driver_path)
+    def __init__(self, driver_type: str):
+        self.driver = WebScrapper(driver_type)
 
     def _persist_images(self, target_folder: str, image_urls: List[str]) -> None:
 
@@ -151,3 +159,5 @@ class DatasetAugmentation:
 
                 if resize_images:
                     self.resize_images(target_folder, image_shape)
+
+        self.driver.close_session()

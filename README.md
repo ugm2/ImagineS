@@ -17,7 +17,7 @@ ImagineS (Image Engine Search) tool augments an image dataset by searching a ser
 
 * Install library
 
-    `pip install dataset_augmentation`
+    `pip install imagines`
 
 ## Usage
 
