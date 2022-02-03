@@ -28,8 +28,7 @@ ImagineS (Image Engine Search) tool augments an image dataset by searching a ser
 ```python
 from imagines import DatasetAugmentation
 dataset_augmentation = DatasetAugmentation(
-    driver_type='chrome',
-    driver_path='path_to/chromedriver',
+    driver_type='chrome'
 )
 label_queries = {
     'apple': ['apple'],
