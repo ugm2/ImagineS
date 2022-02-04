@@ -1,6 +1,7 @@
 import hashlib
 import io
 import json
+import shutil
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -180,6 +181,9 @@ class DatasetAugmentation:
                 images = self._load_label_images(target_folder)
                 images_list += images
                 labels_list += [label] * len(images)
+            elif os.path.exists(target_folder) and not cache_data:
+                logger.info(f"Found target folder {target_folder}. Removing folder...")
+                shutil.rmtree(target_folder)
             else:
                 for query in queries:
 
