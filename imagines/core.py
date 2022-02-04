@@ -1,10 +1,11 @@
 import hashlib
 import io
+import json
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 from PIL import Image
 import requests
 import time
@@ -21,7 +22,7 @@ logger = logging.getLogger("Dataset Augmentation classes")
 
 class WebScrapper:
 
-    def __init__(self, driver_type: str):
+    def __init__(self, driver_type: str = 'chrome'):
         if driver_type == 'chrome':
             op = webdriver.ChromeOptions()
             op.add_argument('headless')
@@ -98,13 +99,15 @@ class WebScrapper:
 
 class DatasetAugmentation:
 
-    def __init__(self, driver_type: str):
+    def __init__(self, driver_type: str = 'chrome'):
         self.driver = WebScrapper(driver_type)
 
-    def _persist_images(self, target_folder: str, image_urls: List[str]) -> None:
+    def _persist_images(self, target_folder: str, image_urls: List[str], return_images: bool = True) -> Optional[List]:
 
         if not os.path.exists(target_folder):
             os.makedirs(target_folder)
+
+        images = [] if return_images else None
 
         for image_url in tqdm(image_urls, desc="Saving images"):
             try:
@@ -116,11 +119,24 @@ class DatasetAugmentation:
             try:
                 image_file = io.BytesIO(image_content)
                 image = Image.open(image_file).convert('RGB')
+                if return_images:
+                    images.append(image.copy())
                 file_path = os.path.join(target_folder, hashlib.sha1(image_content).hexdigest()[:10] + '.jpg')
                 with open(file_path, 'wb') as f:
                     image.save(f)
+                image.close()
             except Exception as e:
                 logger.warning(f"ERROR - Could not save {image_url} - {e}")
+
+        return images
+
+    def _load_label_images(self, image_folder: str) -> List:
+        images = []
+        for image_filename in os.listdir(image_folder):
+            image = Image.open(os.path.join(image_folder, image_filename))
+            images.append(image.copy())
+            image.close()
+        return images
 
     def resize_images(self,
                       folder_path: str,
@@ -139,25 +155,48 @@ class DatasetAugmentation:
                     print(f"ERROR - Could not resize image {file_path} - {e}")
 
     def augment_dataset(self,
-                        label_queries: Dict[str, List[str]],
+                        label_queries: Union[Dict[str, List[str]], str],
                         output_directory: str,
                         max_links_to_fetch: int,
                         image_shape: Tuple[int, int],
                         resize_images: bool = False,
-                        sleep_between_interactions: float = 1) -> None:
+                        sleep_between_interactions: float = 1,
+                        return_data: bool = True,
+                        cache_data: bool = True) -> Optional[Tuple[List, List]]:
+
+        images_list = [] if return_data else None
+        labels_list = [] if return_data else None
+
+        if isinstance(label_queries, str):
+            # Load json file
+            with open(label_queries, 'r') as f:
+                label_queries = json.load(f)
 
         for label, queries in tqdm(label_queries.items(), desc="Augmenting dataset"):
             target_folder = os.path.join(output_directory, label)
 
-            for query in queries:
+            if os.path.exists(target_folder) and cache_data:
+                logger.info(f"Found target folder {target_folder}. Loading images...")
+                images = self._load_label_images(target_folder)
+                images_list += images
+                labels_list += [label] * len(images)
+            else:
+                for query in queries:
 
-                image_urls = self.driver.search_images(query=query,
-                                                    max_links_to_fetch=max_links_to_fetch,
-                                                    sleep_between_interactions=sleep_between_interactions)
+                    image_urls = self.driver.search_images(query=query,
+                                                        max_links_to_fetch=max_links_to_fetch,
+                                                        sleep_between_interactions=sleep_between_interactions)
 
-                self._persist_images(target_folder, image_urls)
+                    images = self._persist_images(target_folder, image_urls)
 
-                if resize_images:
-                    self.resize_images(target_folder, image_shape)
+                    if return_data:
+                        images_list.append(images)
+                        labels_list.append(label)
+
+                    if resize_images:
+                        self.resize_images(target_folder, image_shape)
 
         self.driver.close_session()
+
+        if return_data:
+            return images_list, labels_list
