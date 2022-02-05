@@ -131,12 +131,14 @@ class DatasetAugmentation:
 
         return images
 
-    def _load_label_images(self, image_folder: str) -> List:
+    def _load_label_images(self, image_folder: str, max_images: int) -> List:
         images = []
         for image_filename in os.listdir(image_folder):
             image = Image.open(os.path.join(image_folder, image_filename))
             images.append(image.copy())
             image.close()
+            if len(images) >= max_images:
+                break
         return images
 
     def resize_images(self,
@@ -178,13 +180,13 @@ class DatasetAugmentation:
 
             if os.path.exists(target_folder) and cache_data:
                 logger.info(f"Found target folder {target_folder}. Loading images...")
-                images = self._load_label_images(target_folder)
+                images = self._load_label_images(target_folder, max_links_to_fetch)
                 images_list += images
                 labels_list += [label] * len(images)
-            elif os.path.exists(target_folder) and not cache_data:
-                logger.info(f"Found target folder {target_folder}. Removing folder...")
-                shutil.rmtree(target_folder)
             else:
+                if os.path.exists(target_folder) and not cache_data:
+                    logger.info(f"Found target folder {target_folder}. Removing folder...")
+                    shutil.rmtree(target_folder)
                 for query in queries:
 
                     image_urls = self.driver.search_images(query=query,
