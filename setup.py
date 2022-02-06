@@ -15,7 +15,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="imagines",
-    version="0.0.3",
+    version="0.0.4",
     author="Unai Garay",
     author_email="unaigaraymaestre@gmail.com",
     description="ImagineS (Image Engine Search) tool augments an image dataset by searching a series of queries in Google Images.",
