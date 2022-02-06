@@ -9,8 +9,8 @@ remote_version = (
 )
 assert "." in remote_version
 
-assert os.path.isfile("cf_remote/version.py")
-with open("cf_remote/VERSION", "w", encoding="utf-8") as fh:
+assert os.path.isfile("imagines/version.py")
+with open("imagines/VERSION", "w", encoding="utf-8") as fh:
     fh.write(f"{remote_version}\n")
 
 # Requirements
