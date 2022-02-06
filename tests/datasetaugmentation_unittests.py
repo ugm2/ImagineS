@@ -56,13 +56,18 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
 
     @patch('imagines.core.DatasetAugmentation._persist_images')
     @patch('imagines.core.DatasetAugmentation.resize_images')
+    @patch('imagines.core.DatasetAugmentation._load_label_images')
     @patch('imagines.core.WebScrapper', WebScrapperMock)
-    def test_dataset_augmentation_augment_dataset(self, resize_images_mock, persist_images_mock):
+    def test_dataset_augmentation_augment_dataset(self,
+                                                  load_label_images_mock,
+                                                  resize_images_mock,
+                                                  persist_images_mock):
         """Unit tests for DataAugmentation"""
 
         # Mocks
         persist_images_mock.return_value = None
         resize_images_mock.return_value = None
+        load_label_images_mock.return_value = ['image_1.jpg', 'image_2.jpg']
 
         dataset_augmentation = DatasetAugmentation(
             driver_type='chrome',
@@ -90,7 +95,6 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
         self.assertFalse(resize_images_mock.called)
 
         # Resize images True
-
         resize_images = True
         dataset_augmentation.augment_dataset(
             label_queries,
@@ -104,6 +108,56 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
         # Assert methods have been called
         self.assertTrue(persist_images_mock.called)
         self.assertTrue(resize_images_mock.called)
+
+        # label_queries is a json file path
+        label_queries = './tests/test_artifacts/label_queries.json'
+        dataset_augmentation.augment_dataset(
+            label_queries,
+            self.tmp_dir,
+            max_links_to_fetch,
+            image_shape,
+            resize_images,
+            sleep_between_interactions
+        )
+
+        # Assert methods have been called
+        self.assertTrue(persist_images_mock.called)
+        self.assertTrue(resize_images_mock.called)
+
+        # Cache data
+        label_queries = {
+            'test_label': ['test_image']
+        }
+        dataset_augmentation.augment_dataset(
+            label_queries,
+            './tests/test_artifacts',
+            max_links_to_fetch,
+            image_shape,
+            resize_images,
+            sleep_between_interactions,
+            cache_data=True
+        )
+
+        # Assert methods have been called
+        self.assertTrue(load_label_images_mock.called)
+
+        # Return data
+        images_list, labels_list = dataset_augmentation.augment_dataset(
+            label_queries,
+            './tests/test_artifacts',
+            max_links_to_fetch,
+            image_shape,
+            resize_images,
+            sleep_between_interactions,
+            return_data=True
+        )
+
+        # Assert lists have value and have 2 items
+        self.assertTrue(isinstance(images_list, list))
+        self.assertTrue(isinstance(labels_list, list))
+        self.assertEqual(len(images_list), 2)
+        self.assertEqual(len(labels_list), 2)
+
         
     @patch('imagines.core.WebScrapper', WebScrapperMock)
     @patch('requests.get')
@@ -111,7 +165,7 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
         """Unit tests for DataAugmentation"""
 
         # Load test image from disk
-        with open('./tests/test_artifacts/test_image.jpg', 'rb') as f:
+        with open('./tests/test_artifacts/test_label/test_image.jpg', 'rb') as f:
             image_data = f.read()
 
         def get_mock_function(url, timeout, params=None, headers=None):
@@ -147,7 +201,7 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
         """Unit tests for DataAugmentation"""
 
         # Load test image from disk
-        with open('./tests/test_artifacts/test_image.jpg', 'rb') as f:
+        with open('./tests/test_artifacts/test_label/test_image.jpg', 'rb') as f:
             image_data = f.read()
 
         dataset_augmentation = DatasetAugmentation(
@@ -167,3 +221,26 @@ class DatasetAugmentationUnitTests(unittest.TestCase):
             image_file = io.BytesIO(f.read())
         image = Image.open(image_file).convert('RGB')
         self.assertEqual(image.size, image_shape)
+
+    @patch('imagines.core.WebScrapper', WebScrapperMock)
+    def test_dataset_augmentation_load_label_images(self):
+        """Unit tests for DataAugmentation"""
+
+        image_folder = './tests/test_artifacts/test_label/'
+
+        dataset_augmentation = DatasetAugmentation(
+            driver_type='chrome',
+        )
+        images = dataset_augmentation._load_label_images(image_folder)
+
+        # Assert images have been loaded
+        self.assertTrue(isinstance(images, list))
+        self.assertEqual(len(images), 2)
+
+        # Assert images are of type PIL.Image
+        self.assertTrue(isinstance(images[0], Image.Image))
+        self.assertTrue(isinstance(images[1], Image.Image))
+
+        # max_images
+        images = dataset_augmentation._load_label_images(image_folder, max_images=1)
+        self.assertEqual(len(images), 1)

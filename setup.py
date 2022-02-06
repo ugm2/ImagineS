@@ -1,5 +1,19 @@
 import setuptools
+import subprocess
 import os
+
+remote_version = (
+    subprocess.run(["git", "describe", "--tags"], stdout=subprocess.PIPE)
+    .stdout.decode("utf-8")
+    .strip()
+)
+print("HERE")
+print(remote_version)
+assert "." in remote_version
+
+assert os.path.isfile("cf_remote/version.py")
+with open("cf_remote/VERSION", "w", encoding="utf-8") as fh:
+    fh.write(f"{remote_version}\n")
 
 # Requirements
 thelibFolder = os.path.dirname(os.path.realpath(__file__))
@@ -15,7 +29,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="imagines",
-    version="0.0.3",
+    version=remote_version,
     author="Unai Garay",
     author_email="unaigaraymaestre@gmail.com",
     description="ImagineS (Image Engine Search) tool augments an image dataset by searching a series of queries in Google Images.",
@@ -23,6 +37,9 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/ugm2/ImagineS",
     packages=setuptools.find_packages(include=['imagines']),
+    package_data={
+        'imagines': ['VERSION']
+    },
     install_requires=install_requires,
     classifiers=[
         "Programming Language :: Python :: 3",
