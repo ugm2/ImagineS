@@ -134,7 +134,7 @@ class DatasetAugmentation:
     def _load_label_images(self, image_folder: str, max_images: int) -> List:
         images = []
         for image_filename in os.listdir(image_folder):
-            image = Image.open(os.path.join(image_folder, image_filename))
+            image = Image.open(os.path.join(image_folder, image_filename)).convert('RGB')
             images.append(image.copy())
             image.close()
             if len(images) >= max_images:
