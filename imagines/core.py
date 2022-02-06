@@ -131,13 +131,13 @@ class DatasetAugmentation:
 
         return images
 
-    def _load_label_images(self, image_folder: str, max_images: int) -> List:
+    def _load_label_images(self, image_folder: str, max_images: int = None) -> List:
         images = []
         for image_filename in os.listdir(image_folder):
             image = Image.open(os.path.join(image_folder, image_filename)).convert('RGB')
             images.append(image.copy())
             image.close()
-            if len(images) >= max_images:
+            if max_images is not None and len(images) >= max_images:
                 break
         return images
 
