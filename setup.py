@@ -7,8 +7,6 @@ remote_version = (
     .stdout.decode("utf-8")
     .strip()
 )
-print("HERE")
-print(remote_version)
 assert "." in remote_version
 
 assert os.path.isfile("cf_remote/version.py")
