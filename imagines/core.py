@@ -189,9 +189,10 @@ class DatasetAugmentation:
                     shutil.rmtree(target_folder)
                 for query in queries:
 
-                    image_urls = self.driver.search_images(query=query,
-                                                        max_links_to_fetch=max_links_to_fetch,
-                                                        sleep_between_interactions=sleep_between_interactions)
+                    image_urls = self.driver.search_images(
+                        query=query,
+                        max_links_to_fetch=max_links_to_fetch,
+                        sleep_between_interactions=sleep_between_interactions)
 
                     images = self._persist_images(target_folder, image_urls)
 
@@ -199,8 +200,8 @@ class DatasetAugmentation:
                         images_list.append(images)
                         labels_list.append(label)
 
-                    if resize_images:
-                        self.resize_images(target_folder, image_shape)
+            if resize_images:
+                self.resize_images(output_directory, image_shape)
 
         self.driver.close_session()
 
