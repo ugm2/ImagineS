@@ -153,14 +153,14 @@ class DatasetAugmentation:
                       image_shape: Tuple[int, int]) -> None:
 
         for label in os.listdir(folder_path):
-            folder_path = os.path.join(folder_path, label)
+            label_folder_path = os.path.join(folder_path, label)
 
-            for image_file in tqdm(os.listdir(folder_path), desc="Resizing images"):
-                file_path = os.path.join(folder_path, image_file)
+            for image_file in tqdm(os.listdir(label_folder_path), desc="Resizing images for label {}".format(label)):
+                file_path = os.path.join(label_folder_path, image_file)
                 try:
                     image = Image.open(file_path)
                     image = image.resize(image_shape)
-                    image.save(os.path.join(folder_path, image_file))
+                    image.save(file_path)
                 except Exception as e:
                     print(f"ERROR - Could not resize image {file_path} - {e}")
 
@@ -207,8 +207,8 @@ class DatasetAugmentation:
                         images_list.append(images)
                         labels_list.append(label)
 
-            if resize_images:
-                self.resize_images(output_directory, image_shape)
+        if resize_images:
+            self.resize_images(output_directory, image_shape)
 
         self.driver.close_session()
 
