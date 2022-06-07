@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.utils import ChromeType
 from typing import Dict, List, Optional, Tuple, Union
 from PIL import Image
 import requests
@@ -25,15 +26,21 @@ class WebScrapper:
 
     def __init__(self, driver_type: str = 'chrome'):
         if driver_type == 'chrome':
-            op = webdriver.ChromeOptions()
-            op.add_argument('headless')
-            ser = Service(ChromeDriverManager(log_level=log_level).install())
-            self.driver = webdriver.Chrome(
-                service=ser,
-                options=op
-            )
+            chrome_type=ChromeType.GOOGLE
+        elif driver_type == 'chromium':
+            chrome_type=ChromeType.CHROMIUM
+        elif driver_type == 'brave':
+            chrome_type=ChromeType.BRAVE
         else:
             raise ValueError('Driver type not supported')
+        op = webdriver.ChromeOptions()
+        op.add_argument('headless')
+        ser = Service(ChromeDriverManager(chrome_type=chrome_type).install())
+        self.driver = webdriver.Chrome(
+            service=ser,
+            options=op
+        )
+           
 
     def __scroll_to_end(self, sleep_between_interactions: float = 1) -> None:
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -85,13 +92,13 @@ class WebScrapper:
                 # move the result startpoint further down
                 results_start = len(thumbnail_results)
 
-                if previous_image_count == image_count:
-                    patience -= 1
-                    if patience == 0:
-                        logger.info(f"Found: {len(image_urls)} image links, done!")
-                        break
-                else:
-                    patience = 100
+            if previous_image_count == image_count:
+                patience -= 1
+                if patience == 0:
+                    logger.info(f"Found: {len(image_urls)} image links, done!")
+                    break
+            else:
+                patience = 100
 
         return image_urls
 
